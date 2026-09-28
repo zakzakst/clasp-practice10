@@ -2,33 +2,50 @@
   const form = document.getElementById("form");
   const imageInput = document.getElementById("image");
   const status = document.getElementById("status");
+  const submitButton = form.querySelector('button[type="submit"]');
+
+  const readImage = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.addEventListener("load", () => {
+        if (typeof reader.result !== "string") {
+          reject(new Error("画像を読み込めませんでした。"));
+          return;
+        }
+        resolve({
+          name: file.name,
+          mimeType: file.type,
+          data: reader.result.split(",")[1],
+        });
+      });
+      reader.addEventListener("error", () => reject(reader.error));
+      reader.readAsDataURL(file);
+    });
 
   form.addEventListener("submit", (e) => {
     e.preventDefault();
-    const image = imageInput.files[0];
-    if (!image) return;
+    const files = Array.from(imageInput.files);
+    if (files.length === 0) return;
 
-    status.textContent = "アップロード中...";
-    const reader = new FileReader();
-    reader.addEventListener("load", () => {
-      const data = reader.result.toString().split(",")[1];
-      google.script.run
-        .withSuccessHandler((folderName) => {
-          status.textContent = `${image.name} を ${folderName} フォルダに保存しました。`;
-          form.reset();
-        })
-        .withFailureHandler((error) => {
-          status.textContent = `アップロードに失敗しました: ${error.message}`;
-        })
-        .uploadImage({
-          name: image.name,
-          mimeType: image.type,
-          data,
-        });
-    });
-    reader.addEventListener("error", () => {
-      status.textContent = "画像を読み込めませんでした。";
-    });
-    reader.readAsDataURL(image);
+    submitButton.disabled = true;
+    status.textContent = `${files.length} 枚の画像をアップロード中...`;
+    Promise.all(files.map(readImage))
+      .then((images) => {
+        google.script.run
+          .withSuccessHandler((folderName) => {
+            status.textContent = `${images.length} 枚の画像を ${folderName} フォルダに保存しました。`;
+            form.reset();
+            submitButton.disabled = false;
+          })
+          .withFailureHandler((error) => {
+            status.textContent = `アップロードに失敗しました: ${error.message}`;
+            submitButton.disabled = false;
+          })
+          .uploadImages(images);
+      })
+      .catch((error) => {
+        status.textContent = `画像を読み込めませんでした: ${error.message}`;
+        submitButton.disabled = false;
+      });
   });
 </script>

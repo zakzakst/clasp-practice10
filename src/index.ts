@@ -19,8 +19,11 @@ type ImageUpload = {
   data: string;
 };
 
-const uploadImage = (image: ImageUpload): string => {
-  if (!image.mimeType.startsWith("image/") || !image.data) {
+const uploadImages = (images: ImageUpload[]): string => {
+  if (
+    images.length === 0 ||
+    images.some((image) => !image.mimeType.startsWith("image/") || !image.data)
+  ) {
     throw new Error("画像ファイルを選択してください。");
   }
 
@@ -31,12 +34,15 @@ const uploadImage = (image: ImageUpload): string => {
     "yyyyMMddHHmm",
   );
   const datedFolder = uploadFolder.createFolder(timestamp);
-  const imageBlob = Utilities.newBlob(
-    Utilities.base64Decode(image.data),
-    image.mimeType,
-    image.name,
-  );
 
-  datedFolder.createFile(imageBlob);
+  images.forEach((image) => {
+    const imageBlob = Utilities.newBlob(
+      Utilities.base64Decode(image.data),
+      image.mimeType,
+      image.name,
+    );
+    datedFolder.createFile(imageBlob);
+  });
+
   return timestamp;
 };
