@@ -144,3 +144,5 @@ vite.config.ts.timestamp-*
 
 # clasp
 .clasp.json
+
+local-memo.md
