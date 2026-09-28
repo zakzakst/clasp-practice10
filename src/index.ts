@@ -44,5 +44,5 @@ const uploadImages = (images: ImageUpload[]): string => {
     datedFolder.createFile(imageBlob);
   });
 
-  return timestamp;
+  return datedFolder.getId();
 };

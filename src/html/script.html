@@ -32,8 +32,8 @@
     Promise.all(files.map(readImage))
       .then((images) => {
         google.script.run
-          .withSuccessHandler((folderName) => {
-            status.textContent = `${images.length} 枚の画像を ${folderName} フォルダに保存しました。`;
+          .withSuccessHandler((folderId) => {
+            status.textContent = `${images.length} 枚の画像をフォルダID ${folderId} に保存しました。`;
             form.reset();
             submitButton.disabled = false;
           })
