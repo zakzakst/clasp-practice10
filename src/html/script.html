@@ -1,13 +1,34 @@
 <script>
-  // 実行
   const form = document.getElementById("form");
+  const imageInput = document.getElementById("image");
+  const status = document.getElementById("status");
+
   form.addEventListener("submit", (e) => {
     e.preventDefault();
-    const formData = new FormData(form);
-    // google.script.run
-    //   .withSuccessHandler(() => {
-    //     google.script.host.close();
-    //   })
-    //   .sampleScript(formData.get("inputName"));
+    const image = imageInput.files[0];
+    if (!image) return;
+
+    status.textContent = "アップロード中...";
+    const reader = new FileReader();
+    reader.addEventListener("load", () => {
+      const data = reader.result.toString().split(",")[1];
+      google.script.run
+        .withSuccessHandler((folderName) => {
+          status.textContent = `${image.name} を ${folderName} フォルダに保存しました。`;
+          form.reset();
+        })
+        .withFailureHandler((error) => {
+          status.textContent = `アップロードに失敗しました: ${error.message}`;
+        })
+        .uploadImage({
+          name: image.name,
+          mimeType: image.type,
+          data,
+        });
+    });
+    reader.addEventListener("error", () => {
+      status.textContent = "画像を読み込めませんでした。";
+    });
+    reader.readAsDataURL(image);
   });
 </script>

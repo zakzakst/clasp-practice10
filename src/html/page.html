@@ -12,16 +12,27 @@
   <body>
     <form id="form">
       <div class="field">
+        <label class="label" for="image">アップロードする画像</label>
         <div class="control">
-          <input class="input" name="inputName" />
+          <input
+            class="input"
+            id="image"
+            name="image"
+            type="file"
+            accept="image/*"
+            required
+          />
         </div>
       </div>
 
       <div class="field">
         <div class="control">
-          <button type="submit" class="button is-primary">実行</button>
+          <button type="submit" class="button is-primary">
+            画像をアップロード
+          </button>
         </div>
       </div>
+      <p id="status" role="status" aria-live="polite"></p>
     </form>
     <?!= include('script'); ?>
   </body>
